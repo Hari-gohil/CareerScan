@@ -8,7 +8,7 @@ export async function GET(request) {
     return NextResponse.json({ message: "Query parameter is required" }, { status: 400 });
   }
 
-  const apiKey = process.env['X-RAPIDAPI-KEY'] || process.env['RAPIDAPI_KEY'];
+  const apiKey = process.env['X_RAPIDAPI_KEY'] || process.env['RAPIDAPI_KEY'];
 
   if (!apiKey) {
     return NextResponse.json({ message: "RapidAPI key is not configured on the server" }, { status: 500 });

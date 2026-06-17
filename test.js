@@ -1,7 +1,7 @@
 const fs = require('fs');
 const dotenv = require('dotenv');
 const envConfig = dotenv.parse(fs.readFileSync('./.env'));
-const apiKey = envConfig['X-RAPIDAPI-KEY'] || envConfig['RAPIDAPI_KEY'];
+const apiKey = envConfig['X_RAPIDAPI_KEY'] || envConfig['RAPIDAPI_KEY'];
 
 async function testJSearch() {
   const query = 'Communication & teamwork Presentation skills';
