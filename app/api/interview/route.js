@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
 import connectToDatabase from '@/app/lib/db';
 import Report from '@/app/models/Report';
+import Resume from '@/app/models/Resume';
 import { generateInterviewQuestions } from '@/app/services/aiAnalyzer';
 
 export const maxDuration = 60;
