@@ -3,31 +3,39 @@ require('dotenv').config({ path: '.env' });
 
 const mongoose = require('mongoose');
 
-// We have to dynamically import aiAnalyzer because it's ES module? 
-// No, it's inside Next.js, so we can't easily require it in Node.
-// Let's just make the OpenAI call directly here to see if it fails.
-const { OpenAI } = require('openai');
+// Because aiAnalyzer uses ES syntax, we might need a workaround. 
+// Actually Node 20+ can import ES modules if we use dynamic import.
 
 async function test() {
-  const openai = new OpenAI({
-    apiKey: process.env.GROQ_API_KEY,
-    baseURL: 'https://api.groq.com/openai/v1',
-  });
-
+  await mongoose.connect(process.env.MONGODB_URI);
+  
+  // Register models
+  const User = require('./app/models/User').default;
+  const Resume = require('./app/models/Resume').default;
+  const Report = require('./app/models/Report').default;
+  
   try {
-    const prompt = "You are an ATS. Give me { \"matchPercentage\": 85, \"matchAnalysis\": \"test\" }";
-    const response = await openai.chat.completions.create({
-      model: 'llama-3.1-8b-instant',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.1,
-      response_format: { type: "json_object" },
-    });
+    const report = await Report.findOne({ _id: '6a323f9d19b1f1726ba21f86' }).populate('resumeId');
+    const resumeText = report.resumeId.parsedText;
+    
+    // dynamically import the ES module
+    const { calculateJobMatch } = await import('./app/services/aiAnalyzer.js');
+    
+    console.log("Calling calculateJobMatch...");
+    const result = await calculateJobMatch(resumeText, "Looking for a full stack developer with React, Node, Next.js.");
+    console.log("Match Result:", result);
 
-    const jsonString = response.choices[0].message.content;
-    console.log("Response:", jsonString);
+    report.jobDescription = "Looking for a full stack developer with React, Node, Next.js.";
+    report.matchPercentage = result.matchPercentage;
+    report.matchAnalysis = result.matchAnalysis;
+    await report.save();
+    console.log("Report saved successfully!");
+
   } catch (err) {
-    console.error("Groq API Error:", err);
+    console.error("Test Error:", err);
   }
+  
+  mongoose.disconnect();
 }
 
 test();

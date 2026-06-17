@@ -49,6 +49,6 @@ export async function POST(req, { params }) {
 
   } catch (error) {
     console.error("Match route error:", error);
-    return NextResponse.json({ message: "Error calculating job match." }, { status: 500 });
+    return NextResponse.json({ message: "Error calculating job match.", details: error.message, stack: error.stack }, { status: 500 });
   }
 }
